@@ -130,7 +130,7 @@ const VideoManagement = () => {
 
       {/* Tableau des vidéos */}
       <VideoTable
-        videos={videos as any}
+        videos={videos}
         users={adminUsers}
         onEdit={handleEdit}
         onDelete={handleDelete}
@@ -159,7 +159,7 @@ const VideoManagement = () => {
           </DialogHeader>
           {editingVideo && (
             <VideoForm
-              video={editingVideo as any}
+              video={editingVideo}
               onSubmit={handleUpdate}
               onCancel={() => setEditingVideo(null)}
               isLoading={updateVideoMutation.isPending}

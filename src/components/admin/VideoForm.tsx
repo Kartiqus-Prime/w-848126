@@ -7,34 +7,34 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Upload, Video as VideoIcon } from 'lucide-react';
-import { Video } from '@/lib/firestore';
-import { useAuth } from '@/contexts/AuthContext';
-import { useRecipes } from '@/hooks/useRecipes';
+import { useAuth } from '@/contexts/SupabaseAuthContext';
+import { useSupabaseRecipes, SupabaseRecipe } from '@/hooks/useSupabaseRecipes';
 import { uploadVideoToCloudinary } from '@/lib/cloudinary';
 import { useToast } from '@/hooks/use-toast';
+import { SupabaseVideo } from '@/hooks/useSupabaseVideos';
 
 interface VideoFormProps {
-  video?: Video;
-  onSubmit: (data: Omit<Video, 'id' | 'createdAt'>) => void;
+  video?: SupabaseVideo;
+  onSubmit: (data: Omit<SupabaseVideo, 'id' | 'created_at'>) => void;
   onCancel: () => void;
   isLoading?: boolean;
 }
 
 const VideoForm: React.FC<VideoFormProps> = ({ video, onSubmit, onCancel, isLoading }) => {
   const { currentUser } = useAuth();
-  const { data: recipes } = useRecipes();
+  const { data: recipes } = useSupabaseRecipes();
   const { toast } = useToast();
   
   const [formData, setFormData] = useState({
     title: video?.title || '',
     description: video?.description || '',
-    cloudinaryPublicId: video?.cloudinaryPublicId || '',
+    cloudinary_public_id: video?.cloudinary_public_id || '',
     duration: video?.duration || '',
     views: video?.views || 0,
     likes: video?.likes || 0,
     category: video?.category || '',
-    recipeId: video?.recipeId || '',
-    createdBy: video?.createdBy || currentUser?.uid || ''
+    recipe_id: video?.recipe_id || '',
+    created_by: video?.created_by || currentUser?.id || ''
   });
   
   const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -54,7 +54,7 @@ const VideoForm: React.FC<VideoFormProps> = ({ video, onSubmit, onCancel, isLoad
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    let cloudinaryPublicId = formData.cloudinaryPublicId;
+    let cloudinaryPublicId = formData.cloudinary_public_id;
     
     // Si un nouveau fichier est sélectionné, l'uploader
     if (videoFile) {
@@ -85,13 +85,13 @@ const VideoForm: React.FC<VideoFormProps> = ({ video, onSubmit, onCancel, isLoad
     const cleanData = {
       title: formData.title.trim(),
       description: formData.description.trim(),
-      cloudinaryPublicId,
+      cloudinary_public_id: cloudinaryPublicId,
       duration: formData.duration.trim(),
       views: Math.max(0, formData.views || 0),
       likes: Math.max(0, formData.likes || 0),
       category: formData.category.trim(),
-      recipeId: formData.recipeId || undefined,
-      createdBy: formData.createdBy || currentUser?.uid || ''
+      recipe_id: formData.recipe_id || undefined,
+      created_by: formData.created_by || currentUser?.id || ''
     };
 
     console.log('Submitting video data:', cleanData);
@@ -142,8 +142,8 @@ const VideoForm: React.FC<VideoFormProps> = ({ video, onSubmit, onCancel, isLoad
           </div>
 
           <div>
-            <Label htmlFor="recipeId">Recette associée (optionnel)</Label>
-            <Select value={formData.recipeId} onValueChange={(value) => setFormData({...formData, recipeId: value})}>
+            <Label htmlFor="recipe_id">Recette associée (optionnel)</Label>
+            <Select value={formData.recipe_id} onValueChange={(value) => setFormData({...formData, recipe_id: value})}>
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionner une recette" />
               </SelectTrigger>

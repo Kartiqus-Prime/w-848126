@@ -1,7 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { customCartService, recipeCartService } from '@/lib/firestore-cart';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { useToast } from '@/hooks/use-toast';
 
 export const useCustomCart = () => {
@@ -10,16 +10,16 @@ export const useCustomCart = () => {
   const queryClient = useQueryClient();
 
   const cartQuery = useQuery({
-    queryKey: ['customCart', currentUser?.uid],
-    queryFn: () => customCartService.getCartItems(currentUser!.uid),
+    queryKey: ['customCart', currentUser?.id],
+    queryFn: () => customCartService.getCartItems(currentUser!.id),
     enabled: !!currentUser,
   });
 
   const addToCartMutation = useMutation({
     mutationFn: ({ productId, quantity }: { productId: string; quantity: number }) =>
-      customCartService.addToCart(currentUser!.uid, productId, quantity),
+      customCartService.addToCart(currentUser!.id, productId, quantity),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['customCart', currentUser?.uid] });
+      queryClient.invalidateQueries({ queryKey: ['customCart', currentUser?.id] });
       toast({
         title: "Produit ajouté",
         description: "Le produit a été ajouté à votre panier personnalisé",
@@ -38,14 +38,14 @@ export const useCustomCart = () => {
     mutationFn: ({ cartItemId, quantity }: { cartItemId: string; quantity: number }) =>
       customCartService.updateQuantity(cartItemId, quantity),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['customCart', currentUser?.uid] });
+      queryClient.invalidateQueries({ queryKey: ['customCart', currentUser?.id] });
     },
   });
 
   const removeFromCartMutation = useMutation({
     mutationFn: (cartItemId: string) => customCartService.removeFromCart(cartItemId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['customCart', currentUser?.uid] });
+      queryClient.invalidateQueries({ queryKey: ['customCart', currentUser?.id] });
       toast({
         title: "Produit supprimé",
         description: "Le produit a été retiré de votre panier",
@@ -70,8 +70,8 @@ export const useRecipeCart = () => {
   const queryClient = useQueryClient();
 
   const recipeCartsQuery = useQuery({
-    queryKey: ['recipeCarts', currentUser?.uid],
-    queryFn: () => recipeCartService.getRecipeCarts(currentUser!.uid),
+    queryKey: ['recipeCarts', currentUser?.id],
+    queryFn: () => recipeCartService.getRecipeCarts(currentUser!.id),
     enabled: !!currentUser,
   });
 
@@ -80,9 +80,9 @@ export const useRecipeCart = () => {
       recipeId: string; 
       recipeName: string; 
       ingredients: Array<{productId: string, quantity: number}> 
-    }) => recipeCartService.addRecipeToCart(currentUser!.uid, recipeId, recipeName, ingredients),
+    }) => recipeCartService.addRecipeToCart(currentUser!.id, recipeId, recipeName, ingredients),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['recipeCarts', currentUser?.uid] });
+      queryClient.invalidateQueries({ queryKey: ['recipeCarts', currentUser?.id] });
       toast({
         title: "Recette ajoutée",
         description: "La recette et ses ingrédients ont été ajoutés à votre panier",
@@ -100,7 +100,7 @@ export const useRecipeCart = () => {
   const removeRecipeFromCartMutation = useMutation({
     mutationFn: (recipeCartId: string) => recipeCartService.removeRecipeFromCart(recipeCartId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['recipeCarts', currentUser?.uid] });
+      queryClient.invalidateQueries({ queryKey: ['recipeCarts', currentUser?.id] });
       toast({
         title: "Recette supprimée",
         description: "La recette a été retirée de votre panier",

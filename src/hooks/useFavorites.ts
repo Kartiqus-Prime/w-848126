@@ -1,7 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { favoriteService } from '@/lib/firestore-favorites';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { useToast } from '@/hooks/use-toast';
 
 export const useFavorites = () => {
@@ -10,16 +10,16 @@ export const useFavorites = () => {
   const queryClient = useQueryClient();
 
   const favoritesQuery = useQuery({
-    queryKey: ['favorites', currentUser?.uid],
-    queryFn: () => favoriteService.getUserFavorites(currentUser!.uid),
+    queryKey: ['favorites', currentUser?.id],
+    queryFn: () => favoriteService.getUserFavorites(currentUser!.id),
     enabled: !!currentUser,
   });
 
   const addFavoriteMutation = useMutation({
     mutationFn: ({ itemId, type }: { itemId: string; type: string }) =>
-      favoriteService.addFavorite(currentUser!.uid, itemId, type),
+      favoriteService.addFavorite(currentUser!.id, itemId, type),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['favorites', currentUser?.uid] });
+      queryClient.invalidateQueries({ queryKey: ['favorites', currentUser?.id] });
       toast({
         title: "Ajouté aux favoris",
         description: "L'élément a été ajouté à vos favoris",
@@ -36,9 +36,9 @@ export const useFavorites = () => {
 
   const removeFavoriteMutation = useMutation({
     mutationFn: ({ itemId, type }: { itemId: string; type: string }) =>
-      favoriteService.removeFavorite(currentUser!.uid, itemId, type),
+      favoriteService.removeFavorite(currentUser!.id, itemId, type),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['favorites', currentUser?.uid] });
+      queryClient.invalidateQueries({ queryKey: ['favorites', currentUser?.id] });
       toast({
         title: "Retiré des favoris",
         description: "L'élément a été retiré de vos favoris",

@@ -1,195 +1,222 @@
 
 import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, SlidersHorizontal, Loader2 } from 'lucide-react';
-import PreconfiguredCartCard from '@/components/PreconfiguredCartCard';
-import { useQuery } from '@tanstack/react-query';
-import { preconfiguredCartService } from '@/lib/firestore-cart';
-import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { ShoppingCart, Plus, Package, Users, ArrowRight } from 'lucide-react';
+import { useAuth } from '@/contexts/SupabaseAuthContext';
+import { useCustomCart } from '@/hooks/useCart';
+import { useProducts } from '@/hooks/useProducts';
 import { useToast } from '@/hooks/use-toast';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+
+interface PreconfiguredCart {
+  id: string;
+  name: string;
+  description: string;
+  items: Array<{
+    productId: string;
+    quantity: number;
+  }>;
+  totalPrice: number;
+  estimatedServings: number;
+  category: string;
+}
+
+// Données d'exemple pour les paniers préconfigurés
+const preconfiguredCarts: PreconfiguredCart[] = [
+  {
+    id: '1',
+    name: 'Panier Famille 4 personnes',
+    description: 'Tout le nécessaire pour une semaine de repas équilibrés pour 4 personnes',
+    items: [
+      { productId: '1', quantity: 2 },
+      { productId: '2', quantity: 3 },
+      { productId: '3', quantity: 1 },
+    ],
+    totalPrice: 45.90,
+    estimatedServings: 12,
+    category: 'Famille'
+  },
+  // ... autres paniers
+];
 
 const PreconfiguredCarts = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [addingCartId, setAddingCartId] = useState<string | null>(null);
-  
   const { currentUser } = useAuth();
-  const navigate = useNavigate();
+  const { addToCart } = useCustomCart();
+  const { data: products } = useProducts();
   const { toast } = useToast();
+  const [selectedCategory, setSelectedCategory] = useState<string>('Tous');
 
-  const { data: carts = [], isLoading, error } = useQuery({
-    queryKey: ['preconfiguredCarts'],
-    queryFn: preconfiguredCartService.getAll,
-    staleTime: 5 * 60 * 1000,
-  });
+  const categories = ['Tous', 'Famille', 'Solo', 'Végétarien', 'Express'];
 
-  const categories = Array.from(new Set(carts.map(cart => cart.category)));
+  const filteredCarts = selectedCategory === 'Tous' 
+    ? preconfiguredCarts 
+    : preconfiguredCarts.filter(cart => cart.category === selectedCategory);
 
-  const filteredCarts = carts.filter(cart => {
-    const matchesSearch = cart.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         cart.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || cart.category === selectedCategory;
-    
-    return matchesSearch && matchesCategory;
-  });
-
-  const handleAddToCart = async (cartId: string) => {
+  const handleAddCartToCustomCart = async (cart: PreconfiguredCart) => {
     if (!currentUser) {
-      navigate('/login');
+      toast({
+        title: "Connexion requise",
+        description: "Veuillez vous connecter pour ajouter des produits au panier",
+        variant: "destructive"
+      });
       return;
     }
 
-    setAddingCartId(cartId);
     try {
-      await preconfiguredCartService.addToUserCart(currentUser.uid, cartId);
+      for (const item of cart.items) {
+        addToCart({ productId: item.productId, quantity: item.quantity });
+      }
+      
       toast({
         title: "Panier ajouté",
-        description: "Le panier a été ajouté à votre panier avec succès",
+        description: `Le panier "${cart.name}" a été ajouté à votre panier personnalisé`
       });
     } catch (error) {
-      console.error('Error adding preconfigured cart:', error);
       toast({
         title: "Erreur",
         description: "Impossible d'ajouter le panier",
-        variant: "destructive",
+        variant: "destructive"
       });
-    } finally {
-      setAddingCartId(null);
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Chargement des paniers...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">Erreur lors du chargement des paniers</p>
-          <Button onClick={() => window.location.reload()}>Réessayer</Button>
-        </div>
-      </div>
-    );
-  }
+  const getProductName = (productId: string) => {
+    const product = products?.find(p => p.id === productId);
+    return product?.name || 'Produit inconnu';
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4 flex items-center justify-center">
+            <Package className="h-10 w-10 mr-3 text-orange-500" />
             Paniers Préconfigurés
           </h1>
-          <p className="text-lg text-gray-600">
-            Des paniers d'ingrédients sélectionnés pour vos besoins culinaires
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Découvrez nos sélections de produits soigneusement choisies pour différents besoins et occasions
           </p>
         </div>
 
-        {/* Search and Filters */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-          <div className="flex flex-col lg:flex-row gap-4">
-            {/* Search */}
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input 
-                  placeholder="Rechercher un panier..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-
-            {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-full sm:w-48">
-                  <SelectValue placeholder="Catégorie" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Toutes les catégories</SelectItem>
-                  {categories.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+        {/* Filtres par catégorie */}
+        <div className="flex justify-center mb-8">
+          <div className="flex space-x-2 bg-white p-2 rounded-lg shadow-sm">
+            {categories.map((category) => (
+              <Button
+                key={category}
+                variant={selectedCategory === category ? "default" : "ghost"}
+                onClick={() => setSelectedCategory(category)}
+                className={selectedCategory === category ? "bg-orange-500 hover:bg-orange-600" : ""}
+              >
+                {category}
+              </Button>
+            ))}
           </div>
         </div>
 
-        {/* Quick Categories */}
-        <div className="flex flex-wrap gap-2 mb-8">
-          <Badge 
-            variant={selectedCategory === 'all' ? 'default' : 'outline'} 
-            className="cursor-pointer hover:bg-orange-500 hover:text-white"
-            onClick={() => setSelectedCategory('all')}
-          >
-            Tous
-          </Badge>
-          {categories.slice(0, 6).map((category) => (
-            <Badge 
-              key={category}
-              variant={selectedCategory === category ? 'default' : 'outline'}
-              className="cursor-pointer hover:bg-orange-500 hover:text-white"
-              onClick={() => setSelectedCategory(category)}
-            >
-              {category}
-            </Badge>
+        {/* Grille des paniers */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {filteredCarts.map((cart) => (
+            <Card key={cart.id} className="h-full flex flex-col hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <CardTitle className="text-lg mb-2">{cart.name}</CardTitle>
+                    <Badge variant="outline" className="mb-2">
+                      {cart.category}
+                    </Badge>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-orange-500">
+                      {cart.totalPrice.toFixed(2)} €
+                    </div>
+                  </div>
+                </div>
+                <p className="text-gray-600 text-sm">{cart.description}</p>
+              </CardHeader>
+
+              <CardContent className="flex-1">
+                <div className="space-y-4">
+                  {/* Informations du panier */}
+                  <div className="flex items-center justify-between text-sm text-gray-600">
+                    <div className="flex items-center">
+                      <Users className="h-4 w-4 mr-1" />
+                      <span>{cart.estimatedServings} portions</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Package className="h-4 w-4 mr-1" />
+                      <span>{cart.items.length} produits</span>
+                    </div>
+                  </div>
+
+                  {/* Liste des produits */}
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-sm">Contenu du panier :</h4>
+                    <div className="space-y-1">
+                      {cart.items.slice(0, 3).map((item, index) => (
+                        <div key={index} className="text-sm text-gray-600 flex justify-between">
+                          <span>{getProductName(item.productId)}</span>
+                          <span>×{item.quantity}</span>
+                        </div>
+                      ))}
+                      {cart.items.length > 3 && (
+                        <div className="text-sm text-gray-500">
+                          ... et {cart.items.length - 3} autres produits
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="space-y-2 pt-4 mt-auto">
+                    <Button 
+                      onClick={() => handleAddCartToCustomCart(cart)}
+                      className="w-full bg-orange-500 hover:bg-orange-600"
+                      disabled={!currentUser}
+                    >
+                      <ShoppingCart className="h-4 w-4 mr-2" />
+                      Ajouter au panier
+                    </Button>
+                    
+                    <Button variant="outline" className="w-full">
+                      <ArrowRight className="h-4 w-4 mr-2" />
+                      Voir le détail
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
 
-        {/* Results Header */}
-        <div className="flex items-center justify-between mb-6">
-          <p className="text-gray-600">
-            {filteredCarts.length} paniers disponibles
-          </p>
-        </div>
-
-        {/* Carts Grid */}
-        {filteredCarts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredCarts.map((cart) => (
-              <PreconfiguredCartCard 
-                key={cart.id} 
-                {...cart} 
-                onAddToCart={handleAddToCart}
-                isAdding={addingCartId === cart.id}
-              />
-            ))}
-          </div>
-        ) : (
+        {filteredCarts.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500 mb-4">Aucun panier trouvé avec ces critères</p>
-            <Button 
-              onClick={() => {
-                setSearchTerm('');
-                setSelectedCategory('all');
-              }}
-              variant="outline"
-            >
-              Réinitialiser les filtres
-            </Button>
+            <Package className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+            <h3 className="text-xl font-medium text-gray-600 mb-2">
+              Aucun panier trouvé
+            </h3>
+            <p className="text-gray-500">
+              Aucun panier ne correspond à cette catégorie pour le moment.
+            </p>
+          </div>
+        )}
+
+        {!currentUser && (
+          <div className="mt-8 text-center">
+            <Card className="max-w-md mx-auto">
+              <CardContent className="pt-6">
+                <p className="text-gray-600 mb-4">
+                  Connectez-vous pour ajouter des paniers à votre panier personnalisé
+                </p>
+                <Button 
+                  onClick={() => window.location.href = '/login'}
+                  className="bg-orange-500 hover:bg-orange-600"
+                >
+                  Se connecter
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         )}
       </div>

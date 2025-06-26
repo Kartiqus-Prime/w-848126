@@ -5,16 +5,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { useUserProfile, useUpdateProfile } from '@/hooks/useUserProfile';
+import { useSupabaseProfile, useUpdateSupabaseProfile } from '@/hooks/useSupabaseProfiles';
 import { User, Mail, Calendar, LogOut, Shield, AlertTriangle, CheckCircle, Eye, EyeOff, Settings, Phone, Smartphone } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 
 const Profile = () => {
   const { currentUser, logout, sendVerificationEmail, updateUserProfile, updateUserPassword } = useAuth();
-  const { data: userProfile, isLoading: profileLoading } = useUserProfile();
-  const updateProfile = useUpdateProfile();
+  const { data: userProfile } = useSupabaseProfile(currentUser?.id);
+  const updateProfile = useUpdateSupabaseProfile();
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -42,8 +42,8 @@ const Profile = () => {
   ];
 
   useEffect(() => {
-    if (currentUser?.displayName) {
-      setDisplayName(currentUser.displayName);
+    if (currentUser?.user_metadata?.display_name || currentUser?.user_metadata?.full_name) {
+      setDisplayName(currentUser.user_metadata.display_name || currentUser.user_metadata.full_name);
     }
   }, [currentUser]);
 
@@ -111,25 +111,22 @@ const Profile = () => {
   };
 
   const handleSavePreferences = async () => {
+    if (!currentUser) return;
+    
     try {
       setLoading(true);
       await updateProfile.mutateAsync({
-        preferences: {
-          dietaryRestrictions,
-          favoriteCategories
+        userId: currentUser.id,
+        data: {
+          preferences: {
+            dietaryRestrictions,
+            favoriteCategories
+          }
         }
       });
       setIsEditingPreferences(false);
-      toast({
-        title: "Préférences mises à jour",
-        description: "Vos préférences ont été sauvegardées"
-      });
     } catch (error) {
-      toast({
-        title: "Erreur",
-        description: "Impossible de mettre à jour les préférences",
-        variant: "destructive"
-      });
+      console.error('Error updating preferences:', error);
     } finally {
       setLoading(false);
     }
@@ -222,7 +219,8 @@ const Profile = () => {
     );
   }
 
-  const hasPhoneNumber = currentUser.providerData.some(provider => provider.providerId === 'phone');
+  const hasPhoneNumber = currentUser.identities?.some((identity: any) => identity.provider === 'phone');
+  const isEmailConfirmed = currentUser.email_confirmed_at !== null;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -242,7 +240,7 @@ const Profile = () => {
         <div className="grid gap-6 md:grid-cols-3">
           {/* Informations principales */}
           <div className="md:col-span-2 space-y-6">
-            {!currentUser.emailVerified && currentUser.email && (
+            {!isEmailConfirmed && currentUser.email && (
               <Alert className="border-orange-200 bg-orange-50">
                 <AlertTriangle className="h-4 w-4 text-orange-600" />
                 <AlertDescription className="text-orange-800">
@@ -269,9 +267,9 @@ const Profile = () => {
               <CardContent className="space-y-4">
                 <div className="flex items-center space-x-4">
                   <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center">
-                    {currentUser.photoURL ? (
+                    {currentUser.user_metadata?.avatar_url ? (
                       <img 
-                        src={currentUser.photoURL} 
+                        src={currentUser.user_metadata.avatar_url} 
                         alt="Avatar" 
                         className="w-16 h-16 rounded-full object-cover"
                       />
@@ -289,14 +287,14 @@ const Profile = () => {
                       />
                     ) : (
                       <h3 className="text-lg font-semibold">
-                        {currentUser.displayName || 'Utilisateur'}
+                        {currentUser.user_metadata?.display_name || currentUser.user_metadata?.full_name || 'Utilisateur'}
                       </h3>
                     )}
                     {currentUser.email && (
                       <div className="flex items-center text-gray-600">
                         <Mail className="h-4 w-4 mr-1" />
                         <span className="text-sm">{currentUser.email}</span>
-                        {currentUser.emailVerified && (
+                        {isEmailConfirmed && (
                           <CheckCircle className="h-4 w-4 ml-2 text-green-500" />
                         )}
                       </div>
@@ -314,18 +312,18 @@ const Profile = () => {
                 <div className="flex items-center text-gray-600">
                   <Calendar className="h-4 w-4 mr-2" />
                   <span className="text-sm">
-                    Membre depuis {new Date(currentUser.metadata.creationTime!).toLocaleDateString('fr-FR')}
+                    Membre depuis {new Date(currentUser.created_at).toLocaleDateString('fr-FR')}
                   </span>
                 </div>
 
                 <div className="flex items-center space-x-2 flex-wrap">
-                  {currentUser.emailVerified && (
+                  {isEmailConfirmed && (
                     <Badge variant="default">Email vérifié</Badge>
                   )}
                   {hasPhoneNumber && (
                     <Badge variant="default">Téléphone vérifié</Badge>
                   )}
-                  {currentUser.providerData.some(provider => provider.providerId === 'google.com') && (
+                  {currentUser.identities?.some((identity: any) => identity.provider === 'google') && (
                     <Badge variant="outline">Compte Google</Badge>
                   )}
                   {userProfile?.role === 'admin' && (
@@ -359,54 +357,8 @@ const Profile = () => {
               </CardContent>
             </Card>
 
-            {/* Ajout de numéro de téléphone - Redirection vers mobile */}
-            {!hasPhoneNumber && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Phone className="h-5 w-5 mr-2" />
-                    Numéro de téléphone
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-3 p-4 bg-blue-50 rounded-lg">
-                      <Smartphone className="h-8 w-8 text-blue-500" />
-                      <div className="flex-1">
-                        <h4 className="font-medium text-blue-900">Fonctionnalité mobile</h4>
-                        <p className="text-sm text-blue-700">
-                          L'ajout de numéro de téléphone est disponible sur notre application mobile pour une sécurité optimale.
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex space-x-2">
-                      <Link to="/mobile-redirect" className="flex-1">
-                        <Button 
-                          variant="outline" 
-                          className="w-full border-orange-300 text-orange-600 hover:bg-orange-50"
-                        >
-                          <Phone className="h-4 w-4 mr-2" />
-                          Continuer sur mobile
-                        </Button>
-                      </Link>
-                      <Link to="/download-app">
-                        <Button 
-                          variant="outline"
-                          className="border-blue-300 text-blue-600 hover:bg-blue-50"
-                        >
-                          <Smartphone className="h-4 w-4 mr-2" />
-                          Télécharger l'app
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Password change section */}
-            {!currentUser.providerData.some(provider => provider.providerId === 'google.com') && currentUser.email && (
+            {/* Password change section - Only for email/password users */}
+            {!currentUser.identities?.some((identity: any) => identity.provider === 'google') && currentUser.email && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">

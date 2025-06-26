@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Search, User, ShoppingCart, Heart, LogOut } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/SupabaseAuthContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -102,9 +102,9 @@ const Header = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon">
-                    {currentUser.photoURL ? (
+                    {currentUser.user_metadata?.avatar_url ? (
                       <img 
-                        src={currentUser.photoURL} 
+                        src={currentUser.user_metadata.avatar_url} 
                         alt="Avatar" 
                         className="h-6 w-6 rounded-full"
                       />
@@ -115,7 +115,7 @@ const Header = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <div className="px-2 py-1.5">
-                    <p className="text-sm font-medium">{currentUser.displayName || 'Utilisateur'}</p>
+                    <p className="text-sm font-medium">{currentUser.user_metadata?.display_name || currentUser.user_metadata?.full_name || 'Utilisateur'}</p>
                     <p className="text-xs text-gray-500">{currentUser.email}</p>
                   </div>
                   <DropdownMenuSeparator />
