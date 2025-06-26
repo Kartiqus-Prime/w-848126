@@ -7,33 +7,33 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Trash2, Search } from 'lucide-react';
-import { Recipe } from '@/lib/firestore';
+import { SupabaseRecipe } from '@/hooks/useSupabaseRecipes';
 import { RECIPE_CATEGORIES, RecipeCategory } from '@/lib/categories';
 import { useProducts } from '@/hooks/useProducts';
-import { useVideos } from '@/hooks/useVideos';
+import { useSupabaseVideos } from '@/hooks/useSupabaseVideos';
 
 interface RecipeFormProps {
-  recipe?: Recipe;
-  onSubmit: (data: Omit<Recipe, 'id' | 'createdAt'>) => void;
+  recipe?: SupabaseRecipe;
+  onSubmit: (data: Omit<SupabaseRecipe, 'id' | 'created_at'>) => void;
   onCancel: () => void;
   isLoading?: boolean;
 }
 
 const RecipeForm: React.FC<RecipeFormProps> = ({ recipe, onSubmit, onCancel, isLoading }) => {
   const { data: products } = useProducts();
-  const { data: videos } = useVideos();
+  const { data: videos } = useSupabaseVideos();
   
   const [formData, setFormData] = useState({
     title: recipe?.title || '',
     description: recipe?.description || '',
     image: recipe?.image || '',
-    cookTime: recipe?.cookTime || 30,
+    cook_time: recipe?.cook_time || 30,
     servings: recipe?.servings || 4,
     difficulty: recipe?.difficulty || 'Moyen' as const,
     rating: recipe?.rating || 4.0,
     category: recipe?.category || 'Plats traditionnels maliens' as RecipeCategory,
-    videoId: recipe?.videoId || '',
-    createdBy: recipe?.createdBy || ''
+    video_id: recipe?.video_id || '',
+    created_by: recipe?.created_by || ''
   });
 
   const [ingredients, setIngredients] = useState(recipe?.ingredients || [
@@ -64,7 +64,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ recipe, onSubmit, onCancel, isL
       ...formData,
       ingredients: validIngredients,
       instructions: instructions.filter(inst => inst.trim() !== ''),
-      videoId: formData.videoId || undefined
+      video_id: formData.video_id || undefined
     });
   };
 
@@ -158,8 +158,8 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ recipe, onSubmit, onCancel, isL
           </div>
 
           <div>
-            <Label htmlFor="videoId">Vidéo associée (optionnel)</Label>
-            <Select value={formData.videoId} onValueChange={(value) => setFormData({...formData, videoId: value})}>
+            <Label htmlFor="video_id">Vidéo associée (optionnel)</Label>
+            <Select value={formData.video_id} onValueChange={(value) => setFormData({...formData, video_id: value})}>
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionner une vidéo" />
               </SelectTrigger>
@@ -176,12 +176,12 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ recipe, onSubmit, onCancel, isL
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <Label htmlFor="cookTime">Temps (min) *</Label>
+              <Label htmlFor="cook_time">Temps (min) *</Label>
               <Input
-                id="cookTime"
+                id="cook_time"
                 type="number"
-                value={formData.cookTime}
-                onChange={(e) => setFormData({...formData, cookTime: parseInt(e.target.value)})}
+                value={formData.cook_time}
+                onChange={(e) => setFormData({...formData, cook_time: parseInt(e.target.value)})}
                 required
               />
             </div>
