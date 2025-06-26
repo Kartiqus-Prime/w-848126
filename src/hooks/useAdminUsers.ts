@@ -1,16 +1,33 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { adminUserService, AdminUser } from '@/lib/firebaseAdmin';
 import { useToast } from '@/hooks/use-toast';
+
+// Import conditionnel pour éviter les erreurs côté client
+let adminUserService: any = null;
+let AdminUser: any = null;
+
+try {
+  const adminModule = require('@/lib/firebaseAdmin');
+  adminUserService = adminModule.adminUserService;
+  AdminUser = adminModule.AdminUser;
+} catch (error) {
+  console.warn('Firebase Admin service not available:', error);
+}
 
 export const useAdminUsers = () => {
   const { toast } = useToast();
 
   return useQuery({
     queryKey: ['admin-users'],
-    queryFn: () => adminUserService.getAllUsers(),
+    queryFn: () => {
+      if (!adminUserService) {
+        throw new Error('Service admin non disponible');
+      }
+      return adminUserService.getAllUsers();
+    },
     staleTime: 2 * 60 * 1000, // 2 minutes
     retry: 2,
+    enabled: !!adminUserService,
     meta: {
       onError: () => {
         toast({
@@ -26,8 +43,13 @@ export const useAdminUsers = () => {
 export const useAdminUser = (uid: string) => {
   return useQuery({
     queryKey: ['admin-user', uid],
-    queryFn: () => adminUserService.getUserById(uid),
-    enabled: !!uid,
+    queryFn: () => {
+      if (!adminUserService) {
+        throw new Error('Service admin non disponible');
+      }
+      return adminUserService.getUserById(uid);
+    },
+    enabled: !!uid && !!adminUserService,
     staleTime: 2 * 60 * 1000,
   });
 };
@@ -45,7 +67,12 @@ export const useUpdateAdminUser = () => {
         disabled?: boolean;
         emailVerified?: boolean;
       }
-    }) => adminUserService.updateUser(uid, properties),
+    }) => {
+      if (!adminUserService) {
+        throw new Error('Service admin non disponible');
+      }
+      return adminUserService.updateUser(uid, properties);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       toast({
@@ -69,7 +96,12 @@ export const useDeleteAdminUser = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: (uid: string) => adminUserService.deleteUser(uid),
+    mutationFn: (uid: string) => {
+      if (!adminUserService) {
+        throw new Error('Service admin non disponible');
+      }
+      return adminUserService.deleteUser(uid);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       toast({
@@ -94,8 +126,12 @@ export const useSetUserClaims = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: ({ uid, claims }: { uid: string; claims: { [key: string]: any } }) => 
-      adminUserService.setCustomClaims(uid, claims),
+    mutationFn: ({ uid, claims }: { uid: string; claims: { [key: string]: any } }) => {
+      if (!adminUserService) {
+        throw new Error('Service admin non disponible');
+      }
+      return adminUserService.setCustomClaims(uid, claims);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       toast({
