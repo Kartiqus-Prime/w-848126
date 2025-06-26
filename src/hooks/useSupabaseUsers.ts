@@ -1,7 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAdminSupabase } from '@/hooks/useAdminSupabase';
 
 export interface SupabaseUser {
   id: string;
@@ -19,18 +19,24 @@ export interface SupabaseUser {
 
 export const useSupabaseUsers = () => {
   const { toast } = useToast();
+  const supabaseAdmin = useAdminSupabase();
 
   return useQuery({
     queryKey: ['supabase-users'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase
+        console.log('Fetching users with admin client...');
+        const { data, error } = await supabaseAdmin
           .from('profiles')
           .select('*')
           .order('created_at', { ascending: false });
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error fetching users:', error);
+          throw error;
+        }
 
+        console.log('Users fetched successfully:', data?.length);
         return data.map(user => ({
           id: user.id,
           email: user.email || '',
@@ -59,13 +65,15 @@ export const useSupabaseUsers = () => {
 export const useUpdateSupabaseUser = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const supabaseAdmin = useAdminSupabase();
 
   return useMutation({
     mutationFn: async ({ userId, data }: { 
       userId: string; 
       data: Partial<SupabaseUser>
     }) => {
-      const { error } = await supabase
+      console.log('Updating user:', userId, data);
+      const { error } = await supabaseAdmin
         .from('profiles')
         .update({
           display_name: data.display_name,
@@ -75,7 +83,10 @@ export const useUpdateSupabaseUser = () => {
         })
         .eq('id', userId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating user:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['supabase-users'] });
@@ -98,15 +109,20 @@ export const useUpdateSupabaseUser = () => {
 export const useDeleteSupabaseUser = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const supabaseAdmin = useAdminSupabase();
 
   return useMutation({
     mutationFn: async (userId: string) => {
-      const { error } = await supabase
+      console.log('Deleting user:', userId);
+      const { error } = await supabaseAdmin
         .from('profiles')
         .delete()
         .eq('id', userId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error deleting user:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['supabase-users'] });

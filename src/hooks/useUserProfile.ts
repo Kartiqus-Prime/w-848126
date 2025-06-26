@@ -1,27 +1,30 @@
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { userService, UserProfile } from '@/lib/firestore';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useUserProfile = () => {
   const { currentUser } = useAuth();
-  
+
   return useQuery({
-    queryKey: ['userProfile', currentUser?.id],
-    queryFn: () => userService.getProfile(currentUser!.id),
-    enabled: !!currentUser,
-  });
-};
+    queryKey: ['user-profile', currentUser?.id],
+    queryFn: async () => {
+      if (!currentUser?.id) return null;
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', currentUser.id)
+        .single();
 
-export const useUpdateProfile = () => {
-  const { currentUser } = useAuth();
-  const queryClient = useQueryClient();
+      if (error) {
+        console.error('Error fetching user profile:', error);
+        throw error;
+      }
 
-  return useMutation({
-    mutationFn: (data: Partial<UserProfile>) => 
-      userService.updateProfile(currentUser!.id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['userProfile', currentUser?.id] });
+      return data;
     },
+    enabled: !!currentUser?.id,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
