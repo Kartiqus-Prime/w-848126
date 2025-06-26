@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
@@ -29,14 +28,16 @@ const VideoManagement = () => {
   const updateVideoMutation = useUpdateVideo();
   const deleteVideoMutation = useDeleteVideo();
 
-  // Convertir les utilisateurs Firebase Auth vers le format attendu
+  // Convertir les utilisateurs Firebase Auth vers le format AdminUser attendu
   const users = useMemo(() => {
     return authUsers.map(user => ({
       uid: user.uid,
-      email: user.email,
-      displayName: user.displayName,
+      email: user.email || '',
+      displayName: user.displayName || '',
       photoURL: user.photoURL,
-      role: user.role
+      role: user.role,
+      disabled: user.disabled || false,
+      emailVerified: user.emailVerified || false
     }));
   }, [authUsers]);
 
