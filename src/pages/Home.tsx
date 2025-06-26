@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ChefHat, Users, Star, ArrowRight, Play, Smartphone, Download, Clock, Award, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Footer from '@/components/Footer';
 
 const Home = () => {
   return (
@@ -28,18 +29,18 @@ const Home = () => {
           </p>
           
           {/* App promotion banner */}
-          <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-6 mb-8 text-white shadow-xl animate-fade-in">
+          <div className="bg-gradient-to-r from-orange-500 to-red-600 rounded-2xl p-6 mb-8 text-white shadow-xl animate-fade-in">
             <div className="flex items-center justify-center space-x-4 mb-4">
               <Smartphone className="h-8 w-8" />
               <div className="text-left">
-                <h3 className="text-lg font-semibold">Application mobile bientôt disponible !</h3>
+                <h3 className="text-lg font-semibold">Application mobile disponible !</h3>
                 <p className="text-sm opacity-90">Emportez vos recettes partout avec vous</p>
               </div>
             </div>
             <Link to="/download-app">
-              <Button className="bg-white text-blue-600 hover:bg-gray-100 hover:text-blue-700 font-semibold">
+              <Button className="bg-white text-orange-600 hover:bg-gray-100 hover:text-orange-700 font-semibold">
                 <Download className="h-4 w-4 mr-2" />
-                En savoir plus
+                Télécharger maintenant
               </Button>
             </Link>
           </div>
@@ -57,42 +58,6 @@ const Home = () => {
                 Regarder les vidéos
               </Button>
             </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section - Enhanced */}
-      <section className="py-16 bg-white shadow-inner">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-5xl mx-auto">
-            <div className="text-center group hover:scale-105 transition-transform duration-300">
-              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-orange-200 transition-colors">
-                <ChefHat className="h-8 w-8 text-orange-500" />
-              </div>
-              <div className="text-4xl font-bold text-orange-500 mb-2">500+</div>
-              <div className="text-gray-600">Recettes authentiques</div>
-            </div>
-            <div className="text-center group hover:scale-105 transition-transform duration-300">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-green-200 transition-colors">
-                <Users className="h-8 w-8 text-green-500" />
-              </div>
-              <div className="text-4xl font-bold text-green-500 mb-2">1000+</div>
-              <div className="text-gray-600">Utilisateurs actifs</div>
-            </div>
-            <div className="text-center group hover:scale-105 transition-transform duration-300">
-              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200 transition-colors">
-                <Play className="h-8 w-8 text-purple-500" />
-              </div>
-              <div className="text-4xl font-bold text-purple-500 mb-2">50+</div>
-              <div className="text-gray-600">Vidéos exclusives</div>
-            </div>
-            <div className="text-center group hover:scale-105 transition-transform duration-300">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors">
-                <Award className="h-8 w-8 text-blue-500" />
-              </div>
-              <div className="text-4xl font-bold text-blue-500 mb-2">95%</div>
-              <div className="text-gray-600">Satisfaction client</div>
-            </div>
           </div>
         </div>
       </section>
@@ -168,10 +133,10 @@ const Home = () => {
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
-              { name: "Plats principaux", count: "150+ recettes", color: "bg-red-100 text-red-700", icon: ChefHat },
-              { name: "Desserts", count: "80+ recettes", color: "bg-pink-100 text-pink-700", icon: Star },
-              { name: "Boissons", count: "40+ recettes", color: "bg-blue-100 text-blue-700", icon: Clock },
-              { name: "Entrées", count: "60+ recettes", color: "bg-green-100 text-green-700", icon: TrendingUp }
+              { name: "Plats principaux", count: "Nombreuses recettes", color: "bg-red-100 text-red-700", icon: ChefHat },
+              { name: "Desserts", count: "Variété sucrée", color: "bg-pink-100 text-pink-700", icon: Star },
+              { name: "Boissons", count: "Rafraîchissantes", color: "bg-green-100 text-green-700", icon: Clock },
+              { name: "Entrées", count: "Saveurs d'ouverture", color: "bg-orange-100 text-orange-700", icon: TrendingUp }
             ].map((category, index) => (
               <Card key={index} className="hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:-translate-y-1 border-0 shadow-md">
                 <CardContent className="p-6 text-center">
@@ -197,8 +162,8 @@ const Home = () => {
             Prêt à commencer votre aventure culinaire ?
           </h2>
           <p className="text-xl mb-8 opacity-90 leading-relaxed">
-            Rejoignez des milliers d'utilisateurs qui ont déjà découvert le plaisir de cuisiner 
-            avec Recette+. C'est gratuit, simple et délicieux !
+            Rejoignez notre communauté et découvrez le plaisir de cuisiner 
+            avec Recette+. Une expérience complète et innovante vous attend !
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/signup">
@@ -216,6 +181,8 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 };

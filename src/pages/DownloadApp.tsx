@@ -9,10 +9,10 @@ import { Link } from 'react-router-dom';
 const DownloadApp = () => {
   const features = [
     {
-      icon: <Shield className="h-6 w-6 text-blue-500" />,
+      icon: <Shield className="h-6 w-6 text-green-500" />,
       title: "Sécurité renforcée",
       description: "Authentification par SMS et chiffrement de bout en bout",
-      color: "from-blue-500 to-blue-600"
+      color: "from-green-500 to-green-600"
     },
     {
       icon: <Zap className="h-6 w-6 text-yellow-500" />,
@@ -27,10 +27,10 @@ const DownloadApp = () => {
       color: "from-red-500 to-pink-500"
     },
     {
-      icon: <Users className="h-6 w-6 text-green-500" />,
+      icon: <Users className="h-6 w-6 text-purple-500" />,
       title: "Communauté active",
       description: "Partagez vos créations et découvrez celles des autres chefs",
-      color: "from-green-500 to-emerald-500"
+      color: "from-purple-500 to-indigo-500"
     }
   ];
 
@@ -62,7 +62,7 @@ const DownloadApp = () => {
             Téléchargez Recette+
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Emportez toutes vos recettes favorites dans votre poche avec notre application mobile révolutionnaire
+            Emportez toutes vos recettes favorites dans votre poche avec notre application mobile disponible
           </p>
         </div>
 
@@ -92,7 +92,7 @@ const DownloadApp = () => {
                   </div>
                   <Badge className="bg-white/20 text-white border-white/30 px-4 py-2 text-sm font-semibold">
                     <Phone className="h-4 w-4 mr-2" />
-                    Bientôt disponible
+                    Disponible maintenant
                   </Badge>
                 </div>
               </div>
@@ -127,14 +127,13 @@ const DownloadApp = () => {
         <Card className="mb-12 shadow-xl border-0 animate-fade-in">
           <CardHeader className="text-center pb-6">
             <CardTitle className="text-3xl font-bold text-gray-800 mb-2">Téléchargez maintenant</CardTitle>
-            <p className="text-lg text-gray-600">Application gratuite disponible sur toutes les plateformes</p>
+            <p className="text-lg text-gray-600">Application disponible sur toutes les plateformes</p>
           </CardHeader>
           <CardContent className="pb-8">
             <div className="grid gap-6 md:grid-cols-2 max-w-2xl mx-auto">
               <Button 
                 size="lg" 
                 className="bg-black hover:bg-gray-800 text-white h-20 justify-start relative overflow-hidden group transition-all duration-300 transform hover:scale-[1.02]"
-                disabled
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-gray-800 to-black opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="flex items-center space-x-4 relative z-10">
@@ -151,7 +150,6 @@ const DownloadApp = () => {
               <Button 
                 size="lg" 
                 className="bg-green-600 hover:bg-green-700 text-white h-20 justify-start relative overflow-hidden group transition-all duration-300 transform hover:scale-[1.02]"
-                disabled
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-green-700 to-green-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="flex items-center space-x-4 relative z-10">
@@ -167,9 +165,9 @@ const DownloadApp = () => {
             </div>
             
             <div className="text-center mt-8">
-              <Badge className="bg-gradient-to-r from-yellow-100 to-orange-100 text-orange-700 border-orange-200 px-6 py-3 text-lg font-semibold">
+              <Badge className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-green-200 px-6 py-3 text-lg font-semibold">
                 <Download className="h-5 w-5 mr-2" />
-                Lancement prévu : Mars 2024
+                Application disponible dès maintenant
               </Badge>
             </div>
           </CardContent>
@@ -180,16 +178,17 @@ const DownloadApp = () => {
           <CardContent className="p-8">
             <div className="flex items-start space-x-4">
               <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
-                <span className="text-white text-xl font-bold">!</span>
+                <Heart className="h-6 w-6 text-white" />
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-orange-900 text-xl mb-2">Soyez les premiers informés</h3>
+                <h3 className="font-bold text-orange-900 text-xl mb-2">Rejoignez notre communauté</h3>
                 <p className="text-orange-700 mb-4 text-lg leading-relaxed">
-                  Inscrivez-vous pour recevoir une notification dès que l'application sera disponible au téléchargement.
+                  Découvrez une expérience culinaire unique avec des recettes authentiques du Mali et d'ailleurs, 
+                  disponible maintenant sur votre mobile.
                 </p>
                 <Button className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold px-8 py-3 transform hover:scale-[1.02] transition-all duration-300">
-                  <Heart className="h-5 w-5 mr-2" />
-                  M'inscrire aux notifications
+                  <Smartphone className="h-5 w-5 mr-2" />
+                  Télécharger maintenant
                 </Button>
               </div>
             </div>
