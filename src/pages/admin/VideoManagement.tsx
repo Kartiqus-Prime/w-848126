@@ -1,45 +1,44 @@
+
 import React, { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
-import { Video as VideoType } from '@/lib/firestore';
-import { VideoFilters as VideoFiltersType } from '@/lib/videoService';
-import { useEnhancedVideos, useCreateVideo, useUpdateVideo, useDeleteVideo } from '@/hooks/useEnhancedVideos';
-import { useFirebaseAuthUsers } from '@/hooks/useFirebaseAuthUsers';
+import { useAuth } from '@/contexts/SupabaseAuthContext';
 import VideoHeader from '@/components/admin/video/VideoHeader';
 import VideoFilters from '@/components/admin/video/VideoFilters';
 import VideoTable from '@/components/admin/video/VideoTable';
 import VideoForm from '@/components/admin/VideoForm';
+import { useSupabaseVideos, useCreateSupabaseVideo, useUpdateSupabaseVideo, useDeleteSupabaseVideo, SupabaseVideo } from '@/hooks/useSupabaseVideos';
+import { useSupabaseUsers } from '@/hooks/useSupabaseUsers';
 
 const VideoManagement = () => {
-  const [filters, setFilters] = useState<VideoFiltersType>({});
+  const [filters, setFilters] = useState<any>({});
   const [showForm, setShowForm] = useState(false);
-  const [editingVideo, setEditingVideo] = useState<VideoType | null>(null);
+  const [editingVideo, setEditingVideo] = useState<SupabaseVideo | null>(null);
   
   const { toast } = useToast();
   const { currentUser } = useAuth();
   
   // Hooks pour les données
-  const { data: videos = [], isLoading: videosLoading, refetch } = useEnhancedVideos(filters);
-  const { data: authUsers = [], isLoading: usersLoading } = useFirebaseAuthUsers();
+  const { data: videos = [], isLoading: videosLoading, refetch } = useSupabaseVideos(filters);
+  const { data: users = [], isLoading: usersLoading } = useSupabaseUsers();
   
   // Mutations
-  const createVideoMutation = useCreateVideo();
-  const updateVideoMutation = useUpdateVideo();
-  const deleteVideoMutation = useDeleteVideo();
+  const createVideoMutation = useCreateSupabaseVideo();
+  const updateVideoMutation = useUpdateSupabaseVideo();
+  const deleteVideoMutation = useDeleteSupabaseVideo();
 
-  // Convertir les utilisateurs Firebase Auth vers le format AdminUser attendu
-  const users = useMemo(() => {
-    return authUsers.map(user => ({
-      uid: user.uid,
+  // Convertir les utilisateurs Supabase vers le format AdminUser attendu
+  const adminUsers = useMemo(() => {
+    return users.map(user => ({
+      uid: user.id,
       email: user.email || '',
-      displayName: user.displayName || '',
-      photoURL: user.photoURL,
+      displayName: user.display_name || '',
+      photoURL: user.photo_url,
       role: user.role,
-      disabled: user.disabled || false,
-      emailVerified: user.emailVerified || false
+      disabled: false,
+      emailVerified: true
     }));
-  }, [authUsers]);
+  }, [users]);
 
   // Données calculées
   const categories = useMemo(() => {
@@ -48,18 +47,18 @@ const VideoManagement = () => {
   }, [videos]);
 
   const videoCreators = useMemo(() => {
-    const creatorIds = new Set(videos.map(video => video.createdBy));
-    return users.filter(user => creatorIds.has(user.uid));
-  }, [videos, users]);
+    const creatorIds = new Set(videos.map(video => video.created_by));
+    return adminUsers.filter(user => creatorIds.has(user.uid));
+  }, [videos, adminUsers]);
 
   // Handlers
-  const handleCreate = async (data: Omit<VideoType, 'id' | 'createdAt'>) => {
+  const handleCreate = async (data: Omit<SupabaseVideo, 'id' | 'created_at'>) => {
     if (!currentUser) return;
     
     try {
       await createVideoMutation.mutateAsync({
         ...data,
-        createdBy: currentUser.uid
+        created_by: currentUser.id
       });
       setShowForm(false);
       refetch();
@@ -68,7 +67,7 @@ const VideoManagement = () => {
     }
   };
 
-  const handleUpdate = async (data: Omit<VideoType, 'id' | 'createdAt'>) => {
+  const handleUpdate = async (data: Omit<SupabaseVideo, 'id' | 'created_at'>) => {
     if (!editingVideo) return;
     
     try {
@@ -98,7 +97,7 @@ const VideoManagement = () => {
     setShowForm(true);
   };
 
-  const handleEdit = (video: VideoType) => {
+  const handleEdit = (video: SupabaseVideo) => {
     setEditingVideo(video);
   };
 
@@ -131,8 +130,8 @@ const VideoManagement = () => {
 
       {/* Tableau des vidéos */}
       <VideoTable
-        videos={videos}
-        users={users}
+        videos={videos as any}
+        users={adminUsers}
         onEdit={handleEdit}
         onDelete={handleDelete}
         isLoading={isMutating}
@@ -160,7 +159,7 @@ const VideoManagement = () => {
           </DialogHeader>
           {editingVideo && (
             <VideoForm
-              video={editingVideo}
+              video={editingVideo as any}
               onSubmit={handleUpdate}
               onCancel={() => setEditingVideo(null)}
               isLoading={updateVideoMutation.isPending}

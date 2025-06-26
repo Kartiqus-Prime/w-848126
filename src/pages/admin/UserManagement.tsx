@@ -12,21 +12,20 @@ import { Search, Filter, UserCheck, UserX, Shield, Mail, Calendar, Edit, Trash2 
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import UserProfileForm from '@/components/admin/UserProfileForm';
-import { UserProfile } from '@/lib/firestore';
-import { useFirebaseAuthUsers, useUpdateFirebaseAuthUser, useDeleteFirebaseAuthUser, FirebaseAuthUser } from '@/hooks/useFirebaseAuthUsers';
+import { useSupabaseUsers, useUpdateSupabaseUser, useDeleteSupabaseUser, SupabaseUser } from '@/hooks/useSupabaseUsers';
 
 const UserManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('all');
-  const [selectedUser, setSelectedUser] = useState<FirebaseAuthUser | null>(null);
-  const [editingUser, setEditingUser] = useState<FirebaseAuthUser | null>(null);
+  const [selectedUser, setSelectedUser] = useState<SupabaseUser | null>(null);
+  const [editingUser, setEditingUser] = useState<SupabaseUser | null>(null);
 
-  const { data: users = [], isLoading, error } = useFirebaseAuthUsers();
-  const updateUser = useUpdateFirebaseAuthUser();
-  const deleteUser = useDeleteFirebaseAuthUser();
+  const { data: users = [], isLoading, error } = useSupabaseUsers();
+  const updateUser = useUpdateSupabaseUser();
+  const deleteUser = useDeleteSupabaseUser();
 
   const filteredUsers = users.filter(user => {
-    const matchesSearch = user.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = user.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.email?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = filterRole === 'all' || user.role === filterRole;
     
@@ -34,16 +33,17 @@ const UserManagement = () => {
   });
 
   const handleRoleChange = async (userId: string, newRole: 'user' | 'admin') => {
-    updateUser.mutate({ uid: userId, properties: { role: newRole } });
+    updateUser.mutate({ userId, data: { role: newRole } });
   };
 
-  const handleUpdateProfile = async (data: Partial<UserProfile>) => {
-    if (!editingUser?.uid) return;
+  const handleUpdateProfile = async (data: Partial<SupabaseUser>) => {
+    if (!editingUser?.id) return;
     
     updateUser.mutate({ 
-      uid: editingUser.uid, 
-      properties: {
-        displayName: data.displayName
+      userId: editingUser.id, 
+      data: {
+        display_name: data.display_name,
+        preferences: data.preferences
       }
     });
     setEditingUser(null);
@@ -73,7 +73,7 @@ const UserManagement = () => {
   const activeUsers = users.filter(u => u.role).length;
   const adminUsers = users.filter(u => u.role === 'admin').length;
   const newUsers = users.filter(u => 
-    u.creationTime && new Date().getTime() - new Date(u.creationTime).getTime() < 30 * 24 * 60 * 60 * 1000
+    u.created_at && new Date().getTime() - new Date(u.created_at).getTime() < 30 * 24 * 60 * 60 * 1000
   ).length;
 
   return (
@@ -191,18 +191,18 @@ const UserManagement = () => {
             </TableHeader>
             <TableBody>
               {filteredUsers.map((user) => (
-                <TableRow key={user.uid}>
+                <TableRow key={user.id}>
                   <TableCell>
                     <div className="flex items-center space-x-3">
-                      {user.photoURL && (
+                      {user.photo_url && (
                         <img 
-                          src={user.photoURL} 
-                          alt={user.displayName} 
+                          src={user.photo_url} 
+                          alt={user.display_name} 
                           className="w-8 h-8 rounded-full"
                         />
                       )}
                       <div>
-                        <p className="font-medium">{user.displayName || 'Nom non défini'}</p>
+                        <p className="font-medium">{user.display_name || 'Nom non défini'}</p>
                         <p className="text-sm text-gray-500">{user.email}</p>
                       </div>
                     </div>
@@ -210,7 +210,7 @@ const UserManagement = () => {
                   <TableCell>
                     <Select
                       value={user.role || 'user'}
-                      onValueChange={(value: 'user' | 'admin') => handleRoleChange(user.uid, value)}
+                      onValueChange={(value: 'user' | 'admin') => handleRoleChange(user.id, value)}
                       disabled={updateUser.isPending}
                     >
                       <SelectTrigger className="w-32">
@@ -224,8 +224,8 @@ const UserManagement = () => {
                   </TableCell>
                   <TableCell>
                     <span className="text-sm">
-                      {user.creationTime ? formatDistanceToNow(
-                        new Date(user.creationTime), 
+                      {user.created_at ? formatDistanceToNow(
+                        new Date(user.created_at), 
                         { addSuffix: true, locale: fr }
                       ) : 'Date inconnue'}
                     </span>
@@ -250,7 +250,7 @@ const UserManagement = () => {
                             <div className="space-y-4">
                               <div>
                                 <h4 className="font-medium">Informations générales</h4>
-                                <p className="text-sm text-gray-600">Nom: {selectedUser.displayName || 'Non défini'}</p>
+                                <p className="text-sm text-gray-600">Nom: {selectedUser.display_name || 'Non défini'}</p>
                                 <p className="text-sm text-gray-600">Email: {selectedUser.email}</p>
                                 <p className="text-sm text-gray-600">Rôle: {selectedUser.role}</p>
                               </div>
@@ -285,7 +285,7 @@ const UserManagement = () => {
                           <AlertDialogFooter>
                             <AlertDialogCancel>Annuler</AlertDialogCancel>
                             <AlertDialogAction
-                              onClick={() => handleDeleteUser(user.uid)}
+                              onClick={() => handleDeleteUser(user.id)}
                               className="bg-red-600 hover:bg-red-700"
                             >
                               Supprimer
