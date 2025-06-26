@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -80,7 +79,7 @@ const App = () => (
                 </ProtectedRoute>
               } />
               
-              {/* Public Routes */}
+              {/* Home page with footer */}
               <Route path="/" element={
                 <>
                   <Header />
@@ -90,13 +89,14 @@ const App = () => (
                   <Footer />
                 </>
               } />
+              
+              {/* Other pages without footer */}
               <Route path="/about" element={
                 <>
                   <Header />
                   <main className="flex-1">
                     <About />
                   </main>
-                  <Footer />
                 </>
               } />
               <Route path="/recettes" element={
@@ -105,7 +105,6 @@ const App = () => (
                   <main className="flex-1">
                     <Recipes />
                   </main>
-                  <Footer />
                 </>
               } />
               <Route path="/produits" element={
@@ -114,7 +113,6 @@ const App = () => (
                   <main className="flex-1">
                     <Products />
                   </main>
-                  <Footer />
                 </>
               } />
               <Route path="/videos" element={
@@ -123,7 +121,6 @@ const App = () => (
                   <main className="flex-1">
                     <Videos />
                   </main>
-                  <Footer />
                 </>
               } />
               <Route path="/favoris" element={
@@ -132,7 +129,6 @@ const App = () => (
                   <main className="flex-1">
                     <Favorites />
                   </main>
-                  <Footer />
                 </ProtectedRoute>
               } />
               <Route path="/login" element={
@@ -141,7 +137,6 @@ const App = () => (
                   <main className="flex-1">
                     <Login />
                   </main>
-                  <Footer />
                 </>
               } />
               <Route path="/signup" element={
@@ -150,7 +145,6 @@ const App = () => (
                   <main className="flex-1">
                     <Signup />
                   </main>
-                  <Footer />
                 </>
               } />
               <Route path="/forgot-password" element={
@@ -159,7 +153,6 @@ const App = () => (
                   <main className="flex-1">
                     <ForgotPassword />
                   </main>
-                  <Footer />
                 </>
               } />
               <Route path="/reset-password" element={
@@ -168,7 +161,6 @@ const App = () => (
                   <main className="flex-1">
                     <ResetPassword />
                   </main>
-                  <Footer />
                 </>
               } />
               <Route path="/verify-email" element={
@@ -177,7 +169,6 @@ const App = () => (
                   <main className="flex-1">
                     <VerifyEmail />
                   </main>
-                  <Footer />
                 </>
               } />
               <Route path="/phone-auth" element={
@@ -186,7 +177,6 @@ const App = () => (
                   <main className="flex-1">
                     <PhoneAuth />
                   </main>
-                  <Footer />
                 </>
               } />
               <Route path="/mobile-redirect" element={
@@ -195,7 +185,6 @@ const App = () => (
                   <main className="flex-1">
                     <MobileRedirect />
                   </main>
-                  <Footer />
                 </>
               } />
               <Route path="/download-app" element={
@@ -204,7 +193,6 @@ const App = () => (
                   <main className="flex-1">
                     <DownloadApp />
                   </main>
-                  <Footer />
                 </>
               } />
               <Route path="/profile" element={
@@ -213,7 +201,6 @@ const App = () => (
                   <main className="flex-1">
                     <Profile />
                   </main>
-                  <Footer />
                 </ProtectedRoute>
               } />
               <Route path="/panier" element={
@@ -222,7 +209,6 @@ const App = () => (
                   <main className="flex-1">
                     <Cart />
                   </main>
-                  <Footer />
                 </ProtectedRoute>
               } />
               <Route path="*" element={
@@ -231,7 +217,6 @@ const App = () => (
                   <main className="flex-1">
                     <NotFound />
                   </main>
-                  <Footer />
                 </>
               } />
             </Routes>

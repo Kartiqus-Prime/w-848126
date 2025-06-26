@@ -51,11 +51,8 @@ const DownloadApp = () => {
               <img 
                 src="/lovable-uploads/fd4068e4-5395-416a-a0d9-2f2084813da4.png" 
                 alt="Recette+" 
-                className="h-20 w-auto drop-shadow-lg"
+                className="h-32 w-auto drop-shadow-lg"
               />
-              <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center animate-bounce">
-                <Sparkles className="h-4 w-4 text-white" />
-              </div>
             </div>
           </div>
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-4">
@@ -123,6 +120,27 @@ const DownloadApp = () => {
           </Card>
         </div>
 
+        {/* Realistic Illustration */}
+        <div className="mb-12">
+          <Card className="shadow-xl border-0 overflow-hidden">
+            <CardContent className="p-0">
+              <div className="relative h-96 bg-gradient-to-r from-orange-100 to-red-100">
+                <img 
+                  src="https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=800&h=400&fit=crop"
+                  alt="Plat traditionnel malien"
+                  className="w-full h-full object-cover opacity-80"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end">
+                  <div className="p-8 text-white">
+                    <h3 className="text-2xl font-bold mb-2">Découvrez la cuisine malienne authentique</h3>
+                    <p className="text-lg opacity-90">Des recettes traditionnelles adaptées à votre quotidien</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Download Buttons */}
         <Card className="mb-12 shadow-xl border-0 animate-fade-in">
           <CardHeader className="text-center pb-6">
@@ -138,7 +156,9 @@ const DownloadApp = () => {
                 <div className="absolute inset-0 bg-gradient-to-r from-gray-800 to-black opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="flex items-center space-x-4 relative z-10">
                   <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg">
-                    <span className="text-black font-bold text-lg">📱</span>
+                    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="#000">
+                      <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                    </svg>
                   </div>
                   <div className="text-left">
                     <div className="text-sm opacity-75">Télécharger sur</div>
@@ -154,7 +174,12 @@ const DownloadApp = () => {
                 <div className="absolute inset-0 bg-gradient-to-r from-green-700 to-green-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="flex items-center space-x-4 relative z-10">
                   <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg">
-                    <span className="text-green-600 font-bold text-2xl">▶</span>
+                    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none">
+                      <path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 01-.61-.92V2.734a1 1 0 01.609-.92z" fill="#32D74B"/>
+                      <path d="M20.408 10.46L13.792 12l6.616 1.54c.638.149 1.092.25 1.092 1 0 .75-.454.851-1.092 1L13.792 12z" fill="#32D74B"/>
+                      <path d="M13.792 12L3.61 1.814a1.001 1.001 0 011.391-.205L20.408 10.46 13.792 12z" fill="#32D74B"/>
+                      <path d="M13.792 12l6.616 1.54L5.001 22.391a1.002 1.002 0 01-1.391-.205L13.792 12z" fill="#32D74B"/>
+                    </svg>
                   </div>
                   <div className="text-left">
                     <div className="text-sm opacity-75">Disponible sur</div>
