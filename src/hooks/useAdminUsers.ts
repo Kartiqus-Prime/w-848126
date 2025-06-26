@@ -8,7 +8,7 @@ export const useAdminUsers = () => {
 
   return useQuery({
     queryKey: ['admin-users'],
-    queryFn: adminUserService.getAllUsers,
+    queryFn: () => adminUserService.getAllUsers(),
     staleTime: 2 * 60 * 1000, // 2 minutes
     retry: 2,
     meta: {

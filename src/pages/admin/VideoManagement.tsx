@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
@@ -82,9 +81,7 @@ const VideoManagement = () => {
     }
   };
 
-  const handleAddVideo = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleAddVideo = () => {
     setShowForm(true);
   };
 
