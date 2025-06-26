@@ -26,6 +26,13 @@ const Recipes = () => {
     'Végétarien', 'Végan', 'Sans gluten', 'Dessert', 'Apéritif'
   ];
 
+  const getDifficultyValue = (difficulty: string | undefined): 'Facile' | 'Moyen' | 'Difficile' => {
+    if (difficulty === 'Facile' || difficulty === 'Difficile') {
+      return difficulty;
+    }
+    return 'Moyen'; // Valeur par défaut
+  };
+
   const filteredRecipes = recipes.filter(recipe => {
     const matchesSearch = recipe.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          recipe.description?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -181,7 +188,7 @@ const Recipes = () => {
                 image={recipe.image || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400'}
                 cookTime={recipe.cook_time}
                 servings={recipe.servings}
-                difficulty={recipe.difficulty || 'Moyen'}
+                difficulty={getDifficultyValue(recipe.difficulty)}
                 rating={recipe.rating || 0}
                 category={recipe.category}
                 ingredients={recipe.ingredients}
