@@ -9,21 +9,21 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Search, Filter, UserCheck, UserX, Shield, Mail, Calendar, Edit, Trash2 } from 'lucide-react';
-import { useUsers, useUpdateUser, useDeleteUser } from '@/hooks/useUsers';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import UserProfileForm from '@/components/admin/UserProfileForm';
 import { UserProfile } from '@/lib/firestore';
+import { useFirebaseAuthUsers, useUpdateFirebaseAuthUser, useDeleteFirebaseAuthUser, FirebaseAuthUser } from '@/hooks/useFirebaseAuthUsers';
 
 const UserManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('all');
-  const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
-  const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
+  const [selectedUser, setSelectedUser] = useState<FirebaseAuthUser | null>(null);
+  const [editingUser, setEditingUser] = useState<FirebaseAuthUser | null>(null);
 
-  const { data: users = [], isLoading, error } = useUsers();
-  const updateUser = useUpdateUser();
-  const deleteUser = useDeleteUser();
+  const { data: users = [], isLoading, error } = useFirebaseAuthUsers();
+  const updateUser = useUpdateFirebaseAuthUser();
+  const deleteUser = useDeleteFirebaseAuthUser();
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -34,18 +34,16 @@ const UserManagement = () => {
   });
 
   const handleRoleChange = async (userId: string, newRole: 'user' | 'admin') => {
-    updateUser.mutate({ userId, data: { role: newRole } });
+    updateUser.mutate({ uid: userId, properties: { role: newRole } });
   };
 
   const handleUpdateProfile = async (data: Partial<UserProfile>) => {
-    if (!editingUser?.id) return;
+    if (!editingUser?.uid) return;
     
     updateUser.mutate({ 
-      userId: editingUser.id, 
-      data: {
-        displayName: data.displayName,
-        photoURL: data.photoURL,
-        preferences: data.preferences
+      uid: editingUser.uid, 
+      properties: {
+        displayName: data.displayName
       }
     });
     setEditingUser(null);
@@ -75,7 +73,7 @@ const UserManagement = () => {
   const activeUsers = users.filter(u => u.role).length;
   const adminUsers = users.filter(u => u.role === 'admin').length;
   const newUsers = users.filter(u => 
-    u.createdAt && new Date().getTime() - new Date(u.createdAt.seconds * 1000).getTime() < 30 * 24 * 60 * 60 * 1000
+    u.creationTime && new Date().getTime() - new Date(u.creationTime).getTime() < 30 * 24 * 60 * 60 * 1000
   ).length;
 
   return (
@@ -193,7 +191,7 @@ const UserManagement = () => {
             </TableHeader>
             <TableBody>
               {filteredUsers.map((user) => (
-                <TableRow key={user.id}>
+                <TableRow key={user.uid}>
                   <TableCell>
                     <div className="flex items-center space-x-3">
                       {user.photoURL && (
@@ -212,7 +210,7 @@ const UserManagement = () => {
                   <TableCell>
                     <Select
                       value={user.role || 'user'}
-                      onValueChange={(value: 'user' | 'admin') => handleRoleChange(user.id!, value)}
+                      onValueChange={(value: 'user' | 'admin') => handleRoleChange(user.uid, value)}
                       disabled={updateUser.isPending}
                     >
                       <SelectTrigger className="w-32">
@@ -226,8 +224,8 @@ const UserManagement = () => {
                   </TableCell>
                   <TableCell>
                     <span className="text-sm">
-                      {user.createdAt ? formatDistanceToNow(
-                        new Date(user.createdAt.seconds * 1000), 
+                      {user.creationTime ? formatDistanceToNow(
+                        new Date(user.creationTime), 
                         { addSuffix: true, locale: fr }
                       ) : 'Date inconnue'}
                     </span>
@@ -256,18 +254,6 @@ const UserManagement = () => {
                                 <p className="text-sm text-gray-600">Email: {selectedUser.email}</p>
                                 <p className="text-sm text-gray-600">Rôle: {selectedUser.role}</p>
                               </div>
-                              
-                              {selectedUser.preferences && (
-                                <div>
-                                  <h4 className="font-medium">Préférences</h4>
-                                  <p className="text-sm text-gray-600">
-                                    Restrictions: {selectedUser.preferences.dietaryRestrictions?.join(', ') || 'Aucune'}
-                                  </p>
-                                  <p className="text-sm text-gray-600">
-                                    Catégories favorites: {selectedUser.preferences.favoriteCategories?.join(', ') || 'Aucune'}
-                                  </p>
-                                </div>
-                              )}
                               
                               <div className="flex justify-end">
                                 <Button onClick={() => setEditingUser(selectedUser)}>
@@ -299,7 +285,7 @@ const UserManagement = () => {
                           <AlertDialogFooter>
                             <AlertDialogCancel>Annuler</AlertDialogCancel>
                             <AlertDialogAction
-                              onClick={() => handleDeleteUser(user.id!)}
+                              onClick={() => handleDeleteUser(user.uid)}
                               className="bg-red-600 hover:bg-red-700"
                             >
                               Supprimer
@@ -324,7 +310,7 @@ const UserManagement = () => {
           </DialogHeader>
           {editingUser && (
             <UserProfileForm
-              user={editingUser}
+              user={editingUser as any}
               onSubmit={handleUpdateProfile}
               onCancel={() => setEditingUser(null)}
               isLoading={updateUser.isPending}

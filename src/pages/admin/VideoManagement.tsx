@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
@@ -5,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Video as VideoType } from '@/lib/firestore';
 import { VideoFilters as VideoFiltersType } from '@/lib/videoService';
 import { useEnhancedVideos, useCreateVideo, useUpdateVideo, useDeleteVideo } from '@/hooks/useEnhancedVideos';
-import { useAdminUsers } from '@/hooks/useAdminUsers';
+import { useFirebaseAuthUsers } from '@/hooks/useFirebaseAuthUsers';
 import VideoHeader from '@/components/admin/video/VideoHeader';
 import VideoFilters from '@/components/admin/video/VideoFilters';
 import VideoTable from '@/components/admin/video/VideoTable';
@@ -21,12 +22,23 @@ const VideoManagement = () => {
   
   // Hooks pour les données
   const { data: videos = [], isLoading: videosLoading, refetch } = useEnhancedVideos(filters);
-  const { data: users = [], isLoading: usersLoading } = useAdminUsers();
+  const { data: authUsers = [], isLoading: usersLoading } = useFirebaseAuthUsers();
   
   // Mutations
   const createVideoMutation = useCreateVideo();
   const updateVideoMutation = useUpdateVideo();
   const deleteVideoMutation = useDeleteVideo();
+
+  // Convertir les utilisateurs Firebase Auth vers le format attendu
+  const users = useMemo(() => {
+    return authUsers.map(user => ({
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName,
+      photoURL: user.photoURL,
+      role: user.role
+    }));
+  }, [authUsers]);
 
   // Données calculées
   const categories = useMemo(() => {
