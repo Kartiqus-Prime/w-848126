@@ -3,9 +3,9 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, SlidersHorizontal, Play } from 'lucide-react';
+import { Search, SlidersHorizontal, Play, Loader2 } from 'lucide-react';
 import VideoCard from '@/components/VideoCard';
-import { useVideos } from '@/hooks/useVideos';
+import { useSupabaseVideos } from '@/hooks/useSupabaseVideos';
 import { getVideoThumbnail } from '@/lib/cloudinary';
 import {
   Select,
@@ -18,19 +18,20 @@ import {
 const Videos = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const { data: videos, isLoading } = useVideos();
+  const { data: videos = [], isLoading, error } = useSupabaseVideos();
 
-  const categories = [...new Set(videos?.map(video => video.category) || [])];
+  const categories = [...new Set(videos.map(video => video.category))];
 
-  const filteredVideos = videos?.filter(video => {
+  const filteredVideos = videos.filter(video => {
     const matchesSearch = video.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         video.description.toLowerCase().includes(searchTerm.toLowerCase());
+                         video.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || video.category === selectedCategory;
     return matchesSearch && matchesCategory;
-  }) || [];
+  });
 
   // Helper function to convert duration string to seconds
   const parseDurationToSeconds = (duration: string): number => {
+    if (!duration) return 0;
     const parts = duration.split(':');
     const minutes = parseInt(parts[0], 10);
     const seconds = parseInt(parts[1], 10);
@@ -40,7 +41,21 @@ const Videos = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500"></div>
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Chargement des vidéos...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">Erreur lors du chargement des vidéos</p>
+          <Button onClick={() => window.location.reload()}>Réessayer</Button>
+        </div>
       </div>
     );
   }
@@ -54,7 +69,7 @@ const Videos = () => {
             Vidéos Tutoriels
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Apprenez avec nos chefs experts grâce à plus de {videos?.length || 0} tutoriels vidéo exclusifs
+            Apprenez avec nos chefs experts grâce à plus de {videos.length} tutoriels vidéo exclusifs
           </p>
         </div>
 
@@ -105,10 +120,10 @@ const Videos = () => {
             className="cursor-pointer hover:bg-orange-500 hover:text-white transition-all duration-300 px-4 py-2 text-sm font-semibold"
             onClick={() => setSelectedCategory('all')}
           >
-            Toutes ({videos?.length || 0})
+            Toutes ({videos.length})
           </Badge>
           {categories.slice(0, 6).map((category) => {
-            const count = videos?.filter(v => v.category === category).length || 0;
+            const count = videos.filter(v => v.category === category).length;
             return (
               <Badge 
                 key={category}
@@ -156,12 +171,12 @@ const Videos = () => {
                 <VideoCard 
                   id={video.id}
                   title={video.title}
-                  thumbnail={video.cloudinaryPublicId ? getVideoThumbnail(video.cloudinaryPublicId) : 'https://images.unsplash.com/photo-1516684732162-798a0062be99?w=400'}
-                  duration={parseDurationToSeconds(video.duration)}
-                  views={video.views}
+                  thumbnail={video.cloudinary_public_id ? getVideoThumbnail(video.cloudinary_public_id) : 'https://images.unsplash.com/photo-1516684732162-798a0062be99?w=400'}
+                  duration={parseDurationToSeconds(video.duration || '0:00')}
+                  views={video.views || 0}
                   category={video.category}
                   chef="Chef Recette+"
-                  description={video.description}
+                  description={video.description || ''}
                 />
               </div>
             ))}

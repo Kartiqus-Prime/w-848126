@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Search, SlidersHorizontal, Loader2 } from 'lucide-react';
 import RecipeCard from '@/components/RecipeCard';
-import { useRecipes } from '@/hooks/useRecipes';
+import { useSupabaseRecipes } from '@/hooks/useSupabaseRecipes';
 import {
   Select,
   SelectContent,
@@ -19,7 +19,7 @@ const Recipes = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState('all');
   
-  const { data: recipes = [], isLoading, error } = useRecipes();
+  const { data: recipes = [], isLoading, error } = useSupabaseRecipes();
 
   const categories = [
     'Français', 'Italien', 'Asiatique', 'Méditerranéen', 'Américain', 
@@ -28,7 +28,7 @@ const Recipes = () => {
 
   const filteredRecipes = recipes.filter(recipe => {
     const matchesSearch = recipe.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         recipe.description.toLowerCase().includes(searchTerm.toLowerCase());
+                         recipe.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || recipe.category === selectedCategory;
     const matchesDifficulty = selectedDifficulty === 'all' || recipe.difficulty === selectedDifficulty;
     
@@ -173,7 +173,21 @@ const Recipes = () => {
         {filteredRecipes.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredRecipes.map((recipe) => (
-              <RecipeCard key={recipe.id} {...recipe} />
+              <RecipeCard 
+                key={recipe.id}
+                id={recipe.id}
+                title={recipe.title}
+                description={recipe.description || ''}
+                image={recipe.image || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400'}
+                cookTime={recipe.cook_time}
+                servings={recipe.servings}
+                difficulty={recipe.difficulty || 'Moyen'}
+                rating={recipe.rating || 0}
+                category={recipe.category}
+                ingredients={recipe.ingredients}
+                instructions={recipe.instructions}
+                videoId={recipe.video_id}
+              />
             ))}
           </div>
         ) : (

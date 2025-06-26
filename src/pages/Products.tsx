@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Search, SlidersHorizontal, Loader2 } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
-import { useProducts } from '@/hooks/useProducts';
+import { useSupabaseProducts } from '@/hooks/useSupabaseProducts';
 import {
   Select,
   SelectContent,
@@ -18,7 +18,7 @@ const Products = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
-  const { data: products = [], isLoading, error } = useProducts();
+  const { data: products = [], isLoading, error } = useSupabaseProducts();
 
   const categories = [
     'Légumes', 'Fruits', 'Viandes', 'Poissons', 'Fromages', 
@@ -151,7 +151,18 @@ const Products = () => {
         {filteredProducts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredProducts.map((product) => (
-              <ProductCard key={product.id} {...product} />
+              <ProductCard 
+                key={product.id}
+                id={product.id}
+                name={product.name}
+                price={product.price}
+                image={product.image || 'https://images.unsplash.com/photo-1506617420156-8e4536971650?w=400'}
+                category={product.category}
+                unit={product.unit}
+                inStock={product.in_stock ?? true}
+                rating={product.rating || 0}
+                promotion={product.promotion}
+              />
             ))}
           </div>
         ) : (

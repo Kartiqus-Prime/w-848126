@@ -1,10 +1,12 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider } from "./contexts/SupabaseAuthContext";
 import Header from "./components/Header";
+import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Recipes from "./pages/Recipes";
@@ -39,7 +41,7 @@ const App = () => (
       <Sonner />
       <AuthProvider>
         <BrowserRouter>
-          <div className="min-h-screen bg-background">
+          <div className="min-h-screen bg-background flex flex-col">
             <Routes>
               {/* Admin Routes */}
               <Route path="/admin" element={
@@ -82,137 +84,154 @@ const App = () => (
               <Route path="/" element={
                 <>
                   <Header />
-                  <main>
+                  <main className="flex-1">
                     <Home />
                   </main>
+                  <Footer />
                 </>
               } />
               <Route path="/about" element={
                 <>
                   <Header />
-                  <main>
+                  <main className="flex-1">
                     <About />
                   </main>
+                  <Footer />
                 </>
               } />
               <Route path="/recettes" element={
                 <>
                   <Header />
-                  <main>
+                  <main className="flex-1">
                     <Recipes />
                   </main>
+                  <Footer />
                 </>
               } />
               <Route path="/produits" element={
                 <>
                   <Header />
-                  <main>
+                  <main className="flex-1">
                     <Products />
                   </main>
+                  <Footer />
                 </>
               } />
               <Route path="/videos" element={
                 <>
                   <Header />
-                  <main>
+                  <main className="flex-1">
                     <Videos />
                   </main>
+                  <Footer />
                 </>
               } />
               <Route path="/favoris" element={
                 <ProtectedRoute>
                   <Header />
-                  <main>
+                  <main className="flex-1">
                     <Favorites />
                   </main>
+                  <Footer />
                 </ProtectedRoute>
               } />
               <Route path="/login" element={
                 <>
                   <Header />
-                  <main>
+                  <main className="flex-1">
                     <Login />
                   </main>
+                  <Footer />
                 </>
               } />
               <Route path="/signup" element={
                 <>
                   <Header />
-                  <main>
+                  <main className="flex-1">
                     <Signup />
                   </main>
+                  <Footer />
                 </>
               } />
               <Route path="/forgot-password" element={
                 <>
                   <Header />
-                  <main>
+                  <main className="flex-1">
                     <ForgotPassword />
                   </main>
+                  <Footer />
                 </>
               } />
               <Route path="/reset-password" element={
                 <>
                   <Header />
-                  <main>
+                  <main className="flex-1">
                     <ResetPassword />
                   </main>
+                  <Footer />
                 </>
               } />
               <Route path="/verify-email" element={
                 <>
                   <Header />
-                  <main>
+                  <main className="flex-1">
                     <VerifyEmail />
                   </main>
+                  <Footer />
                 </>
               } />
               <Route path="/phone-auth" element={
                 <>
                   <Header />
-                  <main>
+                  <main className="flex-1">
                     <PhoneAuth />
                   </main>
+                  <Footer />
                 </>
               } />
               <Route path="/mobile-redirect" element={
                 <>
                   <Header />
-                  <main>
+                  <main className="flex-1">
                     <MobileRedirect />
                   </main>
+                  <Footer />
                 </>
               } />
               <Route path="/download-app" element={
                 <>
                   <Header />
-                  <main>
+                  <main className="flex-1">
                     <DownloadApp />
                   </main>
+                  <Footer />
                 </>
               } />
               <Route path="/profile" element={
                 <ProtectedRoute>
                   <Header />
-                  <main>
+                  <main className="flex-1">
                     <Profile />
                   </main>
+                  <Footer />
                 </ProtectedRoute>
               } />
               <Route path="/panier" element={
                 <ProtectedRoute>
                   <Header />
-                  <main>
+                  <main className="flex-1">
                     <Cart />
                   </main>
+                  <Footer />
                 </ProtectedRoute>
               } />
               <Route path="*" element={
                 <>
                   <Header />
-                  <main>
+                  <main className="flex-1">
                     <NotFound />
                   </main>
+                  <Footer />
                 </>
               } />
             </Routes>
