@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import Header from "./components/Header";
 import Home from "./pages/Home";
+import About from "./pages/About";
 import Recipes from "./pages/Recipes";
 import Products from "./pages/Products";
 import Videos from "./pages/Videos";
@@ -84,6 +84,14 @@ const App = () => (
                   <Header />
                   <main>
                     <Home />
+                  </main>
+                </>
+              } />
+              <Route path="/about" element={
+                <>
+                  <Header />
+                  <main>
+                    <About />
                   </main>
                 </>
               } />
