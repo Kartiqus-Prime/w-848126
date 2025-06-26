@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -191,9 +190,6 @@ const Recipes = () => {
                 difficulty={getDifficultyValue(recipe.difficulty)}
                 rating={recipe.rating || 0}
                 category={recipe.category}
-                ingredients={recipe.ingredients}
-                instructions={recipe.instructions}
-                videoId={recipe.video_id}
               />
             ))}
           </div>
