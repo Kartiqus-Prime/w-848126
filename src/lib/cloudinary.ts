@@ -2,7 +2,7 @@
 import { Cloudinary } from 'cloudinary-core';
 
 const cloudinary = new Cloudinary({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'djhr1eae6',
+  cloud_name: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'djhr1eae6',
   secure: true
 });
 
